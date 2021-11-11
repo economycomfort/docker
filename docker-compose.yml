@@ -1,0 +1,305 @@
+version: "3.7"
+
+secrets:
+# Obfuscates sensitive information from the docker-compose file.
+  cloudflare_dns_api_token:
+    file: "./secrets/cloudflare_dns_api_token"
+
+services:
+# - Variables under environment: can be defined explicitly or referenced from a .env file.
+# - All services store persitent data on /mnt/tank/docker.  Modify volumes accordingly.
+# - Assumes /mnt/tank/docker set 0775, root:docker.
+# - Idea is for all containers to be reverse-proxied behind Traefik.
+#   - So either configure Traefik for LetsEncrypt validation via DNS provider, or
+#   - create specific internal DNS entries for each container (e.g., plex.domain.local) pointing
+#     to IP of docker host.
+#   - Internal wildcard DNS entry via dnsmasq could also be used, but lazy.
+
+  ###
+  ### SYSTEM MANAGEMENT CONTAINERS
+  ###
+  # Traefik for container reverse SSL proxy.
+  # All containers with an exposed web front-end are proxied through this
+  # container.  They need to be on the traefik_proxy network, with
+  # appropriate labels to enable them.
+  traefik:
+    container_name: traefik
+    image: traefik
+    restart: unless-stopped
+    domainname: ${DOMAINNAME}
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - traefik_proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${APPDATA}/traefik:/etc/traefik
+    secrets:
+      - "cloudflare_dns_api_token"
+    environment:
+      - TZ
+      - PUID
+      - PGID
+      # This variable must end in _FILE for the token to be read from a file.
+      - "CLOUDFLARE_DNS_API_TOKEN_FILE=/run/secrets/cloudflare_dns_api_token"
+    labels:
+      # Let traefik handle this container (we do not expose containers by default)
+      - traefik.enable=true
+      
+      # Traefik dashboard settings.
+      # Note that the api@internal service is traefik-specific.
+      - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAINNAME}`)
+      - traefik.http.routers.traefik.service=api@internal
+      - traefik.http.routers.traefik.tls.certresolver=letsencrypt
+      - traefik.http.routers.traefik.entrypoints=websecure
+
+      # Password auth (optional) - uses htpasswd user/pass 
+      #- "traefik.http.routers.traefik.middlewares=authtraefik"
+      #- "traefik.http.middlewares.authtraefik.basicauth.users=user:xxx"
+
+      # Global redirect all incoming http to https
+      - traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)
+      - traefik.http.routers.http-catchall.entrypoints=web
+      - traefik.http.routers.http-catchall.middlewares=redirect-to-https
+
+      # Middleware for https redirect
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+
+  # Watchtower keeps all other containers current
+  watchtower:
+    container_name: watchtower
+    restart: always
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    # Checks for new container images every day at 6AM (cron format)
+    command: --schedule "0 0 6 * * *" --cleanup
+    environment:
+      - TZ
+
+  # Web management for containers 
+  portainer:
+    image: portainer/portainer-ce
+    container_name: portainer
+    restart: always
+    command: -H unix:///var/run/docker.sock
+    networks:
+      - traefik_proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${APPDATA}/portainer/data:/data
+    environment:
+      - TZ
+      - PUID
+      - PGID
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.portainer.rule=Host(`portainer.${DOMAINNAME}`)
+      - traefik.http.routers.portainer.entrypoints=websecure
+      - traefik.http.routers.portainer.tls=true
+      - traefik.http.routers.portainer.tls.certresolver=letsencrypt
+      - traefik.http.services.portainer.loadbalancer.server.port=9000
+  
+  # Duplicati for cloud backups of important data.
+  duplicati:
+    container_name: duplicati
+    image: linuxserver/duplicati
+    restart: unless-stopped
+    networks:
+      - traefik_proxy
+    # First run:  Uncomment the ports definition below, SSH into into docker host with:
+    # ssh user@host -L 8200:localhost:8200, log into web UI on http://localhost:8200
+    # Modify Hostnames field to allow the duplicati container hostname (duplicati.${DOMAINNAME})
+    # Save, stop container, uncomment the lines below, restart.
+    #ports:
+    #  - 8200:8200
+    volumes:
+      - ${APPDATA}/duplicati:/config
+      - /mnt/tank/home:/source
+    environment:
+      - PUID
+      - PGID
+      - TZ
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.duplicati.rule=Host(`duplicati.${DOMAINNAME}`)
+      - traefik.http.routers.duplicati.entrypoints=websecure
+      - traefik.http.routers.duplicati.tls=true
+      - traefik.http.routers.duplicati.tls.certresolver=letsencrypt
+      - traefik.http.services.duplicati.loadbalancer.server.port=8200
+        
+  
+  ###
+  ### MEDIA SERVER CONTAINERS
+  ###
+  # Emby for media streaming
+  emby:
+    container_name: emby
+    image: emby/embyserver
+    restart: unless-stopped
+    networks:
+      - traefik_proxy
+    volumes:
+      - ${APPDATA}/emby:/config
+      - /mnt/tank/media/tv:/mnt/tv
+      - /mnt/tank/media/movies:/mnt/movies
+    environment:
+      - TZ
+      - UID=${PUID}
+      - GID=${PGID}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.emby.rule=Host(`emby.${DOMAINNAME}`)
+      - traefik.http.routers.emby.entrypoints=websecure
+      - traefik.http.routers.emby.tls=true
+      - traefik.http.routers.emby.tls.certresolver=letsencrypt
+      - traefik.http.services.emby.loadbalancer.server.port=8096
+
+  # Sabnzbd for snatching usenet NZBs
+  sabnzbd:
+    container_name: sabnzbd
+    image: linuxserver/sabnzbd
+    restart: unless-stopped
+    networks:
+      - traefik_proxy
+    volumes:
+      - ${APPDATA}/sabnzbd:/config
+      - ${APPDATA}/shared/downloads/complete:/downloads/complete
+      - ${APPDATA}/shared/downloads/incomplete:/downloads/incomplete
+    environment:
+      - TZ
+      - PUID
+      - PGID
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.sabnzbd.rule=Host(`sabnzbd.${DOMAINNAME}`)
+      - traefik.http.routers.sabnzbd.entrypoints=websecure
+      - traefik.http.routers.sabnzbd.tls=true
+      - traefik.http.routers.sabnzbd.tls.certresolver=letsencrypt
+      - traefik.http.services.sabnzbd.loadbalancer.server.port=8080
+   
+  # Sonarr for TV series management
+  sonarr:
+    container_name: sonarr
+    image: linuxserver/sonarr
+    restart: unless-stopped
+    networks:
+      - traefik_proxy
+    # Monitors the same directory as sabnzbd for completed downloads,
+    # moves them to same directory for Plex/Emby TV library.
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${APPDATA}/sonarr:/config
+      - ${APPDATA}/shared/downloads:/downloads
+      - /mnt/tank/media/tv:/tv
+    environment:
+      - TZ
+      - PUID
+      - PGID
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.sonarr.rule=Host(`sonarr.${DOMAINNAME}`)
+      - traefik.http.routers.sonarr.entrypoints=websecure
+      - traefik.http.routers.sonarr.tls=true
+      - traefik.http.routers.sonarr.tls.certresolver=letsencrypt
+      - traefik.http.services.sonarr.loadbalancer.server.port=8989
+  
+  # qbittorrent for torrents
+  qbittorrent:
+    container_name: qbittorrent
+    image: linuxserver/qbittorrent
+    restart: unless-stopped
+    networks:
+      - traefik_proxy
+    volumes:
+      - ${APPDATA}/qbittorrent:/config
+      - ${APPDATA}/shared/torrents:/downloads
+      - /mnt/tank/media/movies:/downloads/movies
+      - /mnt/tank/media/tv:/downloads/tv
+      - /mnt/tank/media/other:/downloads/other
+    environment:
+      - TZ
+      - PUID
+      - PGID
+      - UMASK_SET=022
+      - WEBUI_PORT=8080
+    ports:
+      - 51444:51444
+      - 51444:51444/udp
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.qbittorrent.rule=Host(`qbittorrent.${DOMAINNAME}`)
+      - traefik.http.routers.qbittorrent.entrypoints=websecure
+      - traefik.http.routers.qbittorrent.tls=true
+      - traefik.http.routers.qbittorrent.tls.certresolver=letsencrypt
+      - traefik.http.services.qbittorrent.loadbalancer.server.port=8080
+        
+  # Organizr for home media dashboard
+  organizr:
+    container_name: organizr
+    image: linuxserver/organizr
+    restart: unless-stopped
+    networks:
+      - traefik_proxy
+    volumes:
+      - ${APPDATA}/organizr:/config
+    environment:
+      - TZ
+      - PUID
+      - PGID
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.organizr.rule=Host(`organizr.${DOMAINNAME}`)
+      - traefik.http.routers.organizr.entrypoints=websecure
+      - traefik.http.routers.organizr.tls=true
+      - traefik.http.routers.organizr.tls.certresolver=letsencrypt
+      - traefik.http.services.organizr.loadbalancer.server.port=80
+
+  ## 
+  ## Containers for testing
+  ##
+  #alpine:
+  #  container_name: alpine
+  #  image: alpine
+  #  restart: unless-stopped
+  #  volumes:
+  #    - alpine:/alpine
+  #  environment:
+  #    - TZ
+  #  command: "/bin/sh"
+  #  stdin_open: true
+  #  tty: true
+
+networks:
+# Docker network definitions, other than default.
+
+  # Network for containers with exposed services (proxied through Traefik)
+  traefik_proxy:
+    driver_opts:
+      # Set interface name on host to something meaningful
+      com.docker.network.bridge.name: docker_proxy
+  
+  # Network for exposing a direct IP to a container.
+  # Consider for containers that require host networking, or lots of exposed ports,
+  # to prevent port overlap.
+  #direct:
+  #  #external: true                     # network not created by docker-compose
+  #  driver: macvlan
+  #  driver_opts:
+  #    parent: enp0s31f6
+  #  ipam:
+  #    config:
+  #      - subnet: 192.168.1.0/24        # Define the whole network
+  #        # Below options don't work in docker-compose 3.x
+  #        gateway: 192.168.1.1          # Default gateway for containers
+  #        ip_range: 192.168.1.248/29    # Range containers can use
+
+  # Default docker bridge network
+  default:
+    driver_opts:
+      # Set interface name on host to something meaningful
+      com.docker.network.bridge.name: docker_default
+
+volumes:
+  alpine:
