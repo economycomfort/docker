@@ -13,8 +13,8 @@ See `.gitattributes` for files here which are encrypted.  If it's not listed the
 it's fine.
 
 ## Appdata symlink
-For convenience, a symlink should point to where container service configuration files live.
+For convenience, a symlink should point to where container service configuration files live:
 
-  source ~/.env && ln -s $APPDATA appdata
+`source ~/.env && ln -s $APPDATA appdata`
 
 Or run the somewhat-unnecessary `./set_symlink.sh` script.
