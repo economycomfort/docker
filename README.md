@@ -11,3 +11,10 @@ More info [here](https://www.guyrking.com/2018/09/22/encrypt-files-with-git-cryp
 
 See `.gitattributes` for files here which are encrypted.  If it's not listed there,
 it's fine.
+
+## Appdata symlink
+For convenience, a symlink should point to where container service configuration files live.
+
+  source ~/.env && ln -s $APPDATA appdata
+
+Or run the somewhat-unnecessary `./set_symlink.sh` script.

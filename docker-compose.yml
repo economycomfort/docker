@@ -4,11 +4,15 @@ secrets:
 # Obfuscates sensitive information from the docker-compose file.
   cloudflare_dns_api_token:
     file: "./secrets/cloudflare_dns_api_token"
+  samba_users:
+    file: "./secrets/samba_users"
+  samba_pass:
+    file: "./secrets/samba_password"
 
 services:
 # - Variables under environment: can be defined explicitly or referenced from a .env file.
-# - All services store persitent data on /mnt/tank/docker.  Modify volumes accordingly.
-# - Assumes /mnt/tank/docker set 0775, root:docker.
+# - All services store persitent data on ${STORAGE_PATH}/docker.  Modify volumes accordingly.
+# - Assumes ${STORAGE_PATH}/docker set 0775, root:docker.
 # - Idea is for all containers to be reverse-proxied behind Traefik.
 #   - So either configure Traefik for LetsEncrypt validation via DNS provider, or
 #   - create specific internal DNS entries for each container (e.g., plex.domain.local) pointing
@@ -74,7 +78,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     # Checks for new container images every day at 6AM (cron format)
-    command: --schedule "0 0 6 * * *" --cleanup
+    command: --schedule "0 0 6 * * *"
     environment:
       - TZ
 
@@ -116,7 +120,7 @@ services:
     #  - 8200:8200
     volumes:
       - ${APPDATA}/duplicati:/config
-      - /mnt/tank/home:/source
+      - ${STORAGE}/home:/source
     environment:
       - PUID
       - PGID
@@ -129,7 +133,43 @@ services:
       - traefik.http.routers.duplicati.tls.certresolver=letsencrypt
       - traefik.http.services.duplicati.loadbalancer.server.port=8200
         
-  
+  # Samba for file shares.
+  samba:
+    container_name: samba
+    image: dperson/samba
+    restart: unless-stopped
+    networks:
+      - default
+    command:
+      -w "HOME"
+      -u "${SAMBA_USERNAME};${SAMBA_PASSWORD}"
+      -s "timemachine;/share/timemachine;yes;no;no;;;;timemachine"
+      -s "media;/share/iTunes;yes;no;no;;;;media"
+      -s "homes;/share/home/%S;no;no;no;%S;none"
+      -p
+      -r
+      -g "server string = dockerized CIFS SMB server"
+      -g "ea support = yes"
+      -g "fruit:advertise_fullsync = true"
+      -g "durable handles = yes"
+      -g "kernel oplocks = no"
+      -g "kernel share modes = no"
+      -g "posix locking = no"
+      -g "inherit acls = yes"
+    ports:
+      - 137:137
+      - 138:138
+      - 139:139
+      - 445:445
+    volumes:
+      - "${STORAGE}/backups/timemachine:/share/timemachine"
+      - "${STORAGE}/media:/share/media"
+      - "${STORAGE}/homes:/share/home"
+    environment:
+      - PUID
+      - PGID
+      - TZ
+
   ###
   ### MEDIA SERVER CONTAINERS
   ###
@@ -142,8 +182,8 @@ services:
       - traefik_proxy
     volumes:
       - ${APPDATA}/emby:/config
-      - /mnt/tank/media/tv:/mnt/tv
-      - /mnt/tank/media/movies:/mnt/movies
+      - ${STORAGE}/media/tv:/mnt/tv
+      - ${STORAGE}/media/movies:/mnt/movies
     environment:
       - TZ
       - UID=${PUID}
@@ -165,8 +205,8 @@ services:
       - traefik_proxy
     volumes:
       - ${APPDATA}/sabnzbd:/config
-      - ${APPDATA}/shared/downloads/complete:/downloads/complete
-      - ${APPDATA}/shared/downloads/incomplete:/downloads/incomplete
+      - ${STORAGE}/media/downloads/complete:/downloads/complete
+      - ${STORAGE}/media/downloads/incomplete:/downloads/incomplete
     environment:
       - TZ
       - PUID
@@ -192,7 +232,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${APPDATA}/sonarr:/config
       - ${APPDATA}/shared/downloads:/downloads
-      - /mnt/tank/media/tv:/tv
+      - ${STORAGE}/media/tv:/tv
     environment:
       - TZ
       - PUID
@@ -215,9 +255,9 @@ services:
     volumes:
       - ${APPDATA}/qbittorrent:/config
       - ${APPDATA}/shared/torrents:/downloads
-      - /mnt/tank/media/movies:/downloads/movies
-      - /mnt/tank/media/tv:/downloads/tv
-      - /mnt/tank/media/other:/downloads/other
+      - ${STORAGE}/media/movies:/downloads/movies
+      - ${STORAGE}/media/tv:/downloads/tv
+      - ${STORAGE}/media/other:/downloads/other
     environment:
       - TZ
       - PUID
@@ -265,6 +305,7 @@ services:
   #  restart: unless-stopped
   #  volumes:
   #    - alpine:/alpine
+  #    - /mnt/tank/media:/test
   #  environment:
   #    - TZ
   #  command: "/bin/sh"
