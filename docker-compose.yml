@@ -132,43 +132,7 @@ services:
       - traefik.http.routers.duplicati.tls=true
       - traefik.http.routers.duplicati.tls.certresolver=letsencrypt
       - traefik.http.services.duplicati.loadbalancer.server.port=8200
-        
-  # Samba for file shares.
-  samba:
-    container_name: samba
-    image: dperson/samba
-    restart: unless-stopped
-    networks:
-      - default
-    command:
-      -w "HOME"
-      -u "${SAMBA_USERNAME};${SAMBA_PASSWORD}"
-      -s "timemachine;/share/timemachine;yes;no;no;;;;timemachine"
-      -s "media;/share/iTunes;yes;no;no;;;;media"
-      -s "homes;/share/home/%S;no;no;no;%S;none"
-      -p
-      -r
-      -g "server string = dockerized CIFS SMB server"
-      -g "ea support = yes"
-      -g "fruit:advertise_fullsync = true"
-      -g "durable handles = yes"
-      -g "kernel oplocks = no"
-      -g "kernel share modes = no"
-      -g "posix locking = no"
-      -g "inherit acls = yes"
-    ports:
-      - 137:137
-      - 138:138
-      - 139:139
-      - 445:445
-    volumes:
-      - "${STORAGE}/backups/timemachine:/share/timemachine"
-      - "${STORAGE}/media:/share/media"
-      - "${STORAGE}/homes:/share/home"
-    environment:
-      - PUID
-      - PGID
-      - TZ
+  
 
   ###
   ### MEDIA SERVER CONTAINERS
@@ -231,7 +195,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${APPDATA}/sonarr:/config
-      - ${APPDATA}/shared/downloads:/downloads
+      - ${STORAGE}/media/downloads:/downloads
       - ${STORAGE}/media/tv:/tv
     environment:
       - TZ
@@ -311,6 +275,43 @@ services:
   #  command: "/bin/sh"
   #  stdin_open: true
   #  tty: true
+  
+  ## Samba for file shares.
+  #samba:
+  #  container_name: samba
+  #  image: dperson/samba
+  #  restart: unless-stopped
+  #  networks:
+  #    - default
+  #  command:
+  #    -w "HOME"
+  #    -u "${SAMBA_USERNAME};${SAMBA_PASSWORD}"
+  #    -s "timemachine;/share/timemachine;yes;no;no;;;;timemachine"
+  #    -s "media;/share/iTunes;yes;no;no;;;;media"
+  #    -s "homes;/share/home/%S;no;no;no;%S;none"
+  #    -p
+  #    -r
+  #    -g "server string = dockerized CIFS SMB server"
+  #    -g "ea support = yes"
+  #    -g "fruit:advertise_fullsync = true"
+  #    -g "durable handles = yes"
+  #    -g "kernel oplocks = no"
+  #    -g "kernel share modes = no"
+  #    -g "posix locking = no"
+  #    -g "inherit acls = yes"
+  #  ports:
+  #    - 137:137
+  #    - 138:138
+  #    - 139:139
+  #    - 445:445
+  #  volumes:
+  #    - "${STORAGE}/backups/timemachine:/share/timemachine"
+  #    - "${STORAGE}/media:/share/media"
+  #    - "${STORAGE}/homes:/share/home"
+  #  environment:
+  #    - PUID
+  #    - PGID
+  #    - TZ
 
 networks:
 # Docker network definitions, other than default.
