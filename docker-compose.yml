@@ -4,15 +4,11 @@ secrets:
 # Obfuscates sensitive information from the docker-compose file.
   cloudflare_dns_api_token:
     file: "./secrets/cloudflare_dns_api_token"
-  samba_users:
-    file: "./secrets/samba_users"
-  samba_pass:
-    file: "./secrets/samba_password"
 
 services:
 # - Variables under environment: can be defined explicitly or referenced from a .env file.
-# - All services store persitent data on ${STORAGE_PATH}/docker.  Modify volumes accordingly.
-# - Assumes ${STORAGE_PATH}/docker set 0775, root:docker.
+# - All services store persitent data on ${APPDATA}.  Modify volumes accordingly.
+# - Assumes ${APPDATA} set 0775, root:docker.
 # - Idea is for all containers to be reverse-proxied behind Traefik.
 #   - So either configure Traefik for LetsEncrypt validation via DNS provider, or
 #   - create specific internal DNS entries for each container (e.g., plex.domain.local) pointing
