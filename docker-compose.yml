@@ -221,7 +221,6 @@ services:
       - ${APPDATA}/shared/torrents:/downloads
       - ${STORAGE}/media/movies:/downloads/movies
       - ${STORAGE}/media/tv:/downloads/tv
-      - ${STORAGE}/media/other:/downloads/other
     environment:
       - TZ
       - PUID
