@@ -7,7 +7,8 @@ After cloning, use `git-crypt unlock` and enter the GPG key passphrase to decryp
 
 To decrypt, make sure you've added a GPG key with `git-crypt add-gpg-user <GPG_KEY_ID>`.
 
-More info [here](https://www.guyrking.com/2018/09/22/encrypt-files-with-git-crypt.html).
+More info [here](https://www.guyrking.com/2018/09/22/encrypt-files-with-git-crypt.html) and
+[here](https://dev.to/heroku/how-to-manage-your-secrets-with-git-crypt-56ih).
 
 See `.gitattributes` for files here which are encrypted.  If it's not listed there,
 it's fine.

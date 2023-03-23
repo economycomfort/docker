@@ -234,27 +234,6 @@ services:
       - traefik.http.routers.qbittorrent.tls.certresolver=letsencrypt
       - traefik.http.services.qbittorrent.loadbalancer.server.port=8080
         
-  # Organizr for home media dashboard
-  organizr:
-    container_name: organizr
-    image: linuxserver/organizr
-    restart: unless-stopped
-    networks:
-      - traefik_proxy
-    volumes:
-      - ${APPDATA}/organizr:/config
-    environment:
-      - TZ
-      - PUID
-      - PGID
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.organizr.rule=Host(`organizr.${DOMAINNAME}`)
-      - traefik.http.routers.organizr.entrypoints=websecure
-      - traefik.http.routers.organizr.tls=true
-      - traefik.http.routers.organizr.tls.certresolver=letsencrypt
-      - traefik.http.services.organizr.loadbalancer.server.port=80
-
   ## 
   ## Containers for testing
   ##
