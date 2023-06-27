@@ -116,7 +116,7 @@ services:
     #  - 8200:8200
     volumes:
       - ${APPDATA}/duplicati:/config
-      - ${STORAGE}/home:/source
+      - /mnt/fast/home:/source
     environment:
       - PUID
       - PGID
@@ -142,8 +142,8 @@ services:
       - traefik_proxy
     volumes:
       - ${APPDATA}/emby:/config
-      - ${STORAGE}/media/tv:/mnt/tv
-      - ${STORAGE}/media/movies:/mnt/movies
+      - /mnt/tank/media/tv:/mnt/tv
+      - /mnt/tank/media/movies:/mnt/movies
     environment:
       - TZ
       - UID=${PUID}
@@ -165,8 +165,8 @@ services:
       - traefik_proxy
     volumes:
       - ${APPDATA}/sabnzbd:/config
-      - ${STORAGE}/media/downloads/complete:/downloads/complete
-      - ${STORAGE}/media/downloads/incomplete:/downloads/incomplete
+      - /mnt/tank/media/downloads/complete:/downloads/complete
+      - /mnt/tank/media/downloads/incomplete:/downloads/incomplete
     environment:
       - TZ
       - PUID
@@ -191,8 +191,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${APPDATA}/sonarr:/config
-      - ${STORAGE}/media/downloads:/downloads
-      - ${STORAGE}/media/tv:/tv
+      - /mnt/tank/media/downloads:/downloads
+      - /mnt/tank/media/tv:/tv
     environment:
       - TZ
       - PUID
@@ -215,8 +215,8 @@ services:
     volumes:
       - ${APPDATA}/qbittorrent:/config
       - ${APPDATA}/shared/torrents:/downloads
-      - ${STORAGE}/media/movies:/downloads/movies
-      - ${STORAGE}/media/tv:/downloads/tv
+      - /mnt/tank/media/movies:/downloads/movies
+      - /mnt/tank/media/tv:/downloads/tv
     environment:
       - TZ
       - PUID
@@ -279,9 +279,9 @@ services:
   #    - 139:139
   #    - 445:445
   #  volumes:
-  #    - "${STORAGE}/backups/timemachine:/share/timemachine"
-  #    - "${STORAGE}/media:/share/media"
-  #    - "${STORAGE}/homes:/share/home"
+  #    - "/mnt/tank/backups/timemachine:/share/timemachine"
+  #    - "/mnt/tank/media:/share/media"
+  #    - "/mnt/tank/homes:/share/home"
   #  environment:
   #    - PUID
   #    - PGID
