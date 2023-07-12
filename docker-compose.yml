@@ -44,7 +44,8 @@ services:
       # This variable must end in _FILE for the token to be read from a file.
       - "CLOUDFLARE_DNS_API_TOKEN_FILE=/run/secrets/cloudflare_dns_api_token"
     labels:
-      # Let traefik handle this container (we do not expose containers by default)
+      # Let traefik handle this container.
+      # Must be specified for a container to be exposed.
       - traefik.enable=true
       
       # Traefik dashboard settings.
@@ -234,58 +235,6 @@ services:
       - traefik.http.routers.qbittorrent.tls.certresolver=letsencrypt
       - traefik.http.services.qbittorrent.loadbalancer.server.port=8080
         
-  ## 
-  ## Containers for testing
-  ##
-  #alpine:
-  #  container_name: alpine
-  #  image: alpine
-  #  restart: unless-stopped
-  #  volumes:
-  #    - alpine:/alpine
-  #    - /mnt/tank/media:/test
-  #  environment:
-  #    - TZ
-  #  command: "/bin/sh"
-  #  stdin_open: true
-  #  tty: true
-  
-  ## Samba for file shares.
-  #samba:
-  #  container_name: samba
-  #  image: dperson/samba
-  #  restart: unless-stopped
-  #  networks:
-  #    - default
-  #  command:
-  #    -w "HOME"
-  #    -u "${SAMBA_USERNAME};${SAMBA_PASSWORD}"
-  #    -s "timemachine;/share/timemachine;yes;no;no;;;;timemachine"
-  #    -s "media;/share/iTunes;yes;no;no;;;;media"
-  #    -s "homes;/share/home/%S;no;no;no;%S;none"
-  #    -p
-  #    -r
-  #    -g "server string = dockerized CIFS SMB server"
-  #    -g "ea support = yes"
-  #    -g "fruit:advertise_fullsync = true"
-  #    -g "durable handles = yes"
-  #    -g "kernel oplocks = no"
-  #    -g "kernel share modes = no"
-  #    -g "posix locking = no"
-  #    -g "inherit acls = yes"
-  #  ports:
-  #    - 137:137
-  #    - 138:138
-  #    - 139:139
-  #    - 445:445
-  #  volumes:
-  #    - "/mnt/tank/backups/timemachine:/share/timemachine"
-  #    - "/mnt/tank/media:/share/media"
-  #    - "/mnt/tank/homes:/share/home"
-  #  environment:
-  #    - PUID
-  #    - PGID
-  #    - TZ
 
 networks:
 # Docker network definitions, other than default.
@@ -318,4 +267,3 @@ networks:
       com.docker.network.bridge.name: docker_default
 
 volumes:
-  alpine:
