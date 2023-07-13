@@ -16,8 +16,23 @@ services:
 #   - Internal wildcard DNS entry via dnsmasq could also be used, but lazy.
 
   ###
-  ### SYSTEM MANAGEMENT CONTAINERS
+  ### COMMON CONTAINERS
   ###
+  # Watchtower keeps all other containers current
+  watchtower:
+    container_name: watchtower
+    restart: always
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    # Checks for new container images every day at 6AM (cron format)
+    command: --schedule "0 0 6 * * *"
+    environment:
+      - TZ
+  
+  ##
+  ## SERVO CONTAINERS
+  ##
   # Traefik for container reverse SSL proxy.
   # All containers with an exposed web front-end are proxied through this
   # container.  They need to be on the reverse_proxy network, with
@@ -69,18 +84,6 @@ services:
       # Middleware for https redirect
       - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
 
-  # Watchtower keeps all other containers current
-  watchtower:
-    container_name: watchtower
-    restart: always
-    image: containrrr/watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    # Checks for new container images every day at 6AM (cron format)
-    command: --schedule "0 0 6 * * *"
-    environment:
-      - TZ
-
   # Web management for containers 
   portainer:
     image: portainer/portainer-ce
@@ -103,7 +106,7 @@ services:
       - traefik.http.routers.portainer.tls=true
       - traefik.http.routers.portainer.tls.certresolver=letsencrypt
       - traefik.http.services.portainer.loadbalancer.server.port=9000
-  
+
   # Duplicati for cloud backups of important data.
   duplicati:
     container_name: duplicati
@@ -134,10 +137,6 @@ services:
       - traefik.http.routers.duplicati.tls.certresolver=letsencrypt
       - traefik.http.services.duplicati.loadbalancer.server.port=8200
   
-
-  ###
-  ### MEDIA SERVER CONTAINERS
-  ###
   # Emby for media streaming
   emby:
     container_name: emby
@@ -247,9 +246,82 @@ services:
       - traefik.http.routers.qbittorrent.tls.certresolver=letsencrypt
       - traefik.http.services.qbittorrent.loadbalancer.server.port=8080
   
-##
-## TEST CONTAINERS
-##
+  ##
+  ## HOMEBOT CONTAINERS
+  ##
+  # MQTT broker
+  mosquitto:
+    container_name: mosquitto
+    image: eclipse-mosquitto
+    restart: always
+    profiles:
+      - homebot
+    networks:
+      - homebot
+    volumes:
+      #- ./appdata/mosquitto:/mosquitto/config
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+    environment:
+      - TZ
+      - PUID
+      - PGID
+
+    # Zigbee device management
+    zigbee2mqtt:
+      container_name: zigbee2mqtt
+      hostname: zigbee2mqtt
+      image: koenkk/zigbee2mqtt:latest
+      restart: always
+      profiles:
+        - homebot
+      network:
+        - homebot
+      depends_on:
+        - "mosquitto"
+      volumes:
+        - /run/udev:/run/udev:ro
+        - zigbee2mqtt_data:/app/data
+        - zigbee2mqtt_log:/app/data/log
+        - ./appdata/zigbee2mqtt/configuration.yaml:/app/data/configuration.yaml
+      devices:
+        #- /dev/ttyACM0:/dev/ttyACM0
+        - /dev/ttyUSB0:/dev/ttyUSB0
+      environment:
+        - TZ
+        - PUID
+        - PGID
+      ports:
+        - 8080:8080
+      privileged: true
+
+    # Homekit integration
+    homebridge:
+      container_name: homebridge
+      hostname: homebridge
+      image: oznu/homebridge
+      restart: always
+      profiles:
+        - homebot
+      network:
+        - homebot
+      network_mode: host
+      volumes:
+        - ./appdata/homebridge/config.json:/homebridge/config.json
+        - homebridge_data:/homebridge
+      environment:
+        - TZ
+        - PUID
+        - PGID
+        - HOMEBRIDGE_CONFIG_UI=1
+        - HOMEBRIDGE_CONFIG_UI_PORT:8180
+      labels:
+        # Do not update this container via watchtower
+        - com.centurylinklabs.watchtower.enable=false
+  
+  ##
+  ## TEST CONTAINERS
+  ##
   debian:
     image: debian
     command: /bin/sh
@@ -259,31 +331,26 @@ services:
 networks:
 # Docker network definitions, other than default.
 
-  # Network for containers with exposed services (proxied through Traefik)
-  reverse_proxy:
-    driver_opts:
-      # Set interface name on host to something meaningful
-      com.docker.network.bridge.name: docker_proxy
-  
-  # Network for exposing a direct IP to a container.
-  # Consider for containers that require host networking, or lots of exposed ports,
-  # to prevent port overlap.
-  #direct:
-  #  #external: true                     # network not created by docker-compose
-  #  driver: macvlan
-  #  driver_opts:
-  #    parent: enp0s31f6
-  #  ipam:
-  #    config:
-  #      - subnet: 192.168.1.0/24        # Define the whole network
-  #        # Below options don't work in docker-compose 3.x
-  #        gateway: 192.168.1.1          # Default gateway for containers
-  #        ip_range: 192.168.1.248/29    # Range containers can use
-
   # Default docker bridge network
   default:
     driver_opts:
       # Set interface name on host to something meaningful
       com.docker.network.bridge.name: docker
 
-  #volumes:
+  # Network for containers with exposed services (proxied through Traefik)
+  reverse_proxy:
+    driver_opts:
+      com.docker.network.bridge.name: reverse_proxy
+  
+  # Network for homebot services
+  homebot:
+    driver_opts:
+      com.docker.network.bridge.name: docker_homebot
+
+volumes:
+  portainer_data:
+  mosquitto_data:
+  mosquitto_log:
+  zigbee2mqtt_log:
+  zigbee2mqtt_data:
+  homebridge_data:
