@@ -20,18 +20,20 @@ services:
   ###
   # Traefik for container reverse SSL proxy.
   # All containers with an exposed web front-end are proxied through this
-  # container.  They need to be on the traefik_proxy network, with
+  # container.  They need to be on the reverse_proxy network, with
   # appropriate labels to enable them.
   traefik:
     container_name: traefik
     image: traefik
     restart: unless-stopped
     domainname: ${DOMAINNAME}
+    profiles:
+      - servo
     ports:
       - 80:80
       - 443:443
     networks:
-      - traefik_proxy
+      - reverse_proxy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${APPDATA}/traefik:/etc/traefik
@@ -83,10 +85,10 @@ services:
   portainer:
     image: portainer/portainer-ce
     container_name: portainer
-    restart: always
+    restart: unless-stopped
     command: -H unix:///var/run/docker.sock
     networks:
-      - traefik_proxy
+      - reverse_proxy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${APPDATA}/portainer/data:/data
@@ -107,8 +109,10 @@ services:
     container_name: duplicati
     image: linuxserver/duplicati
     restart: unless-stopped
+    profiles:
+      - servo
     networks:
-      - traefik_proxy
+      - reverse_proxy
     # First run:  Uncomment the ports definition below, SSH into into docker host with:
     # ssh user@host -L 8200:localhost:8200, log into web UI on http://localhost:8200
     # Modify Hostnames field to allow the duplicati container hostname (duplicati.${DOMAINNAME})
@@ -139,8 +143,10 @@ services:
     container_name: emby
     image: emby/embyserver
     restart: unless-stopped
+    profiles:
+      - servo
     networks:
-      - traefik_proxy
+      - reverse_proxy
     volumes:
       - ${APPDATA}/emby:/config
       - /mnt/tank/media/tv:/mnt/tv
@@ -162,8 +168,10 @@ services:
     container_name: sabnzbd
     image: linuxserver/sabnzbd
     restart: unless-stopped
+    profiles:
+      - servo
     networks:
-      - traefik_proxy
+      - reverse_proxy
     volumes:
       - ${APPDATA}/sabnzbd:/config
       - /mnt/tank/media/downloads/complete:/downloads/complete
@@ -185,8 +193,10 @@ services:
     container_name: sonarr
     image: linuxserver/sonarr
     restart: unless-stopped
+    profiles:
+      - servo
     networks:
-      - traefik_proxy
+      - reverse_proxy
     # Monitors the same directory as sabnzbd for completed downloads,
     # moves them to same directory for Plex/Emby TV library.
     volumes:
@@ -211,8 +221,10 @@ services:
     container_name: qbittorrent
     image: linuxserver/qbittorrent
     restart: unless-stopped
+    profiles:
+      - servo
     networks:
-      - traefik_proxy
+      - reverse_proxy
     volumes:
       - ${APPDATA}/qbittorrent:/config
       - ${APPDATA}/shared/torrents:/downloads
@@ -234,13 +246,21 @@ services:
       - traefik.http.routers.qbittorrent.tls=true
       - traefik.http.routers.qbittorrent.tls.certresolver=letsencrypt
       - traefik.http.services.qbittorrent.loadbalancer.server.port=8080
-        
+  
+##
+## TEST CONTAINERS
+##
+  debian:
+    image: debian
+    command: /bin/sh
+    profiles:
+      - test
 
 networks:
 # Docker network definitions, other than default.
 
   # Network for containers with exposed services (proxied through Traefik)
-  traefik_proxy:
+  reverse_proxy:
     driver_opts:
       # Set interface name on host to something meaningful
       com.docker.network.bridge.name: docker_proxy
@@ -264,6 +284,6 @@ networks:
   default:
     driver_opts:
       # Set interface name on host to something meaningful
-      com.docker.network.bridge.name: docker_default
+      com.docker.network.bridge.name: docker
 
-volumes:
+  #volumes:
