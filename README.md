@@ -1,5 +1,5 @@
-# docker-media
-Files relating to docker services for home media streaming.
+# docker
+Various services for homelab operation.
 
 ## Secrets
 Files within the `secrets` directory are GPG encrypted upon commit with `git-crypt`.
