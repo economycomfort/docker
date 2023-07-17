@@ -38,7 +38,7 @@ services:
       - cloudflare_dns_api_token
     environment:
       # This variable must end in _FILE for the token to be read from a file.
-      - CLOUDFLARE_DNS_API_TOKEN_FILE: /run/secrets/cloudflare_dns_api_token
+      CLOUDFLARE_DNS_API_TOKEN_FILE: /run/secrets/cloudflare_dns_api_token
     labels:
       # Let traefik handle this container.
       # Must be specified for a container to be exposed.
