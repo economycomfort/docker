@@ -251,7 +251,7 @@ services:
       - mqtt
     profiles:
       - homebot
-    network:
+    networks:
       - homebot
     #ports:
     #  - 8080:8080 # can be moved behind traefik
@@ -282,7 +282,7 @@ services:
     restart: always
     profiles:
       - homebot
-    network:
+    networks:
       - homebot
     # network_mode: host  # use if docker bridge + avahi has issues      
     ports:
@@ -309,8 +309,6 @@ services:
       - traefik.http.services.qbittorrent.loadbalancer.server.port=8581
 
 networks:
-# Docker network definitions, other than default.
-
   # Default docker bridge network
   default:
     driver_opts:
