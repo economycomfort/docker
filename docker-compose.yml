@@ -241,32 +241,32 @@ services:
     volumes:
       - ${APPDATA}/mosquitto:/mosquitto/config:ro
 
-    # Zigbee device management
-    z2m:
-      container_name: zigbee2mqtt
-      hostname: zigbee2mqtt
-      image: koenkk/zigbee2mqtt:latest
-      restart: always
-      depends_on:
-        - mqtt
-      profiles:
-        - homebot
-      network:
-        - homebot
-      #ports:
-      #  - 8080:8080 # can be moved behind traefik
-      volumes:
-        - /run/udev:/run/udev:ro
-        - ${APPDATA}/zigbee2mqtt:/app/data
-        - zigbee2mqtt_log:/app/data/log # keep log data out of config dir.
-      devices:
-        - /dev/ttyUSB0:/dev/ttyUSB0 # match to USB device of Zigbee adapter.
-      #privileged: true # If used, comment out group_add and user sections.
-      group_add:
-        # Match to group of Zigbee USB adapter; required to run non-root.
-        - dialout
-      user: ${PUID}:${PGID} # run as non-root user.
-      labels:
+  # Zigbee device management
+  z2m:
+    container_name: zigbee2mqtt
+    hostname: zigbee2mqtt
+    image: koenkk/zigbee2mqtt:latest
+    restart: always
+    depends_on:
+      - mqtt
+    profiles:
+      - homebot
+    network:
+      - homebot
+    #ports:
+    #  - 8080:8080 # can be moved behind traefik
+    volumes:
+      - /run/udev:/run/udev:ro
+      - ${APPDATA}/zigbee2mqtt:/app/data
+      - zigbee2mqtt_log:/app/data/log # keep log data out of config dir.
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0 # match to USB device of Zigbee adapter.
+    #privileged: true # If used, comment out group_add and user sections.
+    group_add:
+      # Match to group of Zigbee USB adapter; required to run non-root.
+      - dialout
+    user: ${PUID}:${PGID} # run as non-root user.
+    labels:
       - traefik.enable=true
       - traefik.http.routers.qbittorrent.rule=Host(`z2m.${DOMAINNAME}`)
       - traefik.http.routers.qbittorrent.entrypoints=websecure
@@ -274,39 +274,39 @@ services:
       - traefik.http.routers.qbittorrent.tls.certresolver=letsencrypt
       - traefik.http.services.qbittorrent.loadbalancer.server.port=8080
 
-    # Homekit integration for non-supported devices
-    homebridge:
-      container_name: homebridge
-      hostname: homebridge
-      image: homebridge/homebridge
-      restart: always
-      profiles:
-        - homebot
-      network:
-        - homebot
-      # network_mode: host  # use if docker bridge + avahi has issues
-      ports:
-        - 53936:53936/tcp # match bridge port from config.json
-        #- 8581:8581 # web UI, can be moved behind traefik
-      volumes:
-        - ${APPDATA}/homebridge/config.json:/homebridge/config.json
-        - homebridge_data:/homebridge
-      logging:
-        driver: json-file
-        options:
-          max-size: 10mb
-          max-file: 1
-      labels:
-        # Do not update this container via watchtower
-        - com.centurylinklabs.watchtower.enable=false
+  # Homekit integration for non-supported devices
+  homebridge:
+    container_name: homebridge
+    hostname: homebridge
+    image: homebridge/homebridge
+    restart: always
+    profiles:
+      - homebot
+    network:
+      - homebot
+    # network_mode: host  # use if docker bridge + avahi has issues      
+    ports:
+      - 53936:53936/tcp # match bridge port from config.json
+      #- 8581:8581 # web UI, can be moved behind traefik
+    volumes:
+      - ${APPDATA}/homebridge/config.json:/homebridge/config.json
+      - homebridge_data:/homebridge
+    logging:
+      driver: json-file
+      options:
+        max-size: 10mb
+        max-file: 1
+    labels:
+      # Do not update this container via watchtower
+      - com.centurylinklabs.watchtower.enable=false
 
-        # Traefik labels
-        - traefik.enable=true
-        - traefik.http.routers.qbittorrent.rule=Host(`homebridge.${DOMAINNAME}`)
-        - traefik.http.routers.qbittorrent.entrypoints=websecure
-        - traefik.http.routers.qbittorrent.tls=true
-        - traefik.http.routers.qbittorrent.tls.certresolver=letsencrypt
-        - traefik.http.services.qbittorrent.loadbalancer.server.port=8581
+      # Traefik labels
+      - traefik.enable=true
+      - traefik.http.routers.qbittorrent.rule=Host(`homebridge.${DOMAINNAME}`)
+      - traefik.http.routers.qbittorrent.entrypoints=websecure
+      - traefik.http.routers.qbittorrent.tls=true
+      - traefik.http.routers.qbittorrent.tls.certresolver=letsencrypt
+      - traefik.http.services.qbittorrent.loadbalancer.server.port=8581
 
 networks:
 # Docker network definitions, other than default.
