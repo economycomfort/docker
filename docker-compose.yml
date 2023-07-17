@@ -13,11 +13,16 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     # Checks for new container images every day at 6AM (cron format)
     command: --schedule "0 0 6 * * *"
-
+  
+  ##
+  ## SERVO CONTAINERS
+  ##
   # Traefik for container reverse SSL proxy.
-  # All containers with an exposed web front-end are proxied through this
-  # container.  They need to be on the reverse_proxy network, with
-  # appropriate labels to enable them.
+  # - All containers with a web front-end should be exposed through Traefik.
+  # - Containers running on the same host as the Traefik container itself should
+  #   be on the 'reverse_proxy' network.
+  # - Containers on different hosts should be manually defined under the
+  #   Traefik "rules" directory.
   traefik:
     container_name: traefik
     image: traefik
@@ -25,7 +30,6 @@ services:
     domainname: ${DOMAINNAME}
     profiles:
       - servo
-      - homebot
     ports:
       - 80:80
       - 443:443
@@ -62,10 +66,7 @@ services:
 
       # Middleware for https redirect
       - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
-  
-  ##
-  ## SERVO CONTAINERS
-  ##
+
   # Web management for containers 
   portainer:
     image: portainer/portainer-ce
@@ -253,8 +254,8 @@ services:
       - homebot
     networks:
       - homebot
-    #ports:
-    #  - 8080:8080 # can be moved behind traefik
+    ports:
+      - 8080:8080
     volumes:
       - /run/udev:/run/udev:ro
       - ${APPDATA}/zigbee2mqtt:/app/data
@@ -266,13 +267,6 @@ services:
       # Match to group of Zigbee USB adapter; required to run non-root.
       - dialout
     user: ${PUID}:${PGID} # run as non-root user.
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.qbittorrent.rule=Host(`z2m.${DOMAINNAME}`)
-      - traefik.http.routers.qbittorrent.entrypoints=websecure
-      - traefik.http.routers.qbittorrent.tls=true
-      - traefik.http.routers.qbittorrent.tls.certresolver=letsencrypt
-      - traefik.http.services.qbittorrent.loadbalancer.server.port=8080
 
   # Homekit integration for non-supported devices
   homebridge:
@@ -287,7 +281,7 @@ services:
     # network_mode: host  # use if docker bridge + avahi has issues      
     ports:
       - 53936:53936/tcp # match bridge port from config.json
-      #- 8581:8581 # web UI, can be moved behind traefik
+      - 8581:8581 # web UI
     volumes:
       - ${APPDATA}/homebridge/config.json:/homebridge/config.json
       - homebridge_data:/homebridge
@@ -299,14 +293,6 @@ services:
     labels:
       # Do not update this container via watchtower
       - com.centurylinklabs.watchtower.enable=false
-
-      # Traefik labels
-      - traefik.enable=true
-      - traefik.http.routers.qbittorrent.rule=Host(`homebridge.${DOMAINNAME}`)
-      - traefik.http.routers.qbittorrent.entrypoints=websecure
-      - traefik.http.routers.qbittorrent.tls=true
-      - traefik.http.routers.qbittorrent.tls.certresolver=letsencrypt
-      - traefik.http.services.qbittorrent.loadbalancer.server.port=8581
 
 networks:
   # Default docker bridge network
