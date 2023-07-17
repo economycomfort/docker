@@ -1,0 +1,264 @@
+{
+    "0x000d6ffffefc849c": {
+        "brightness": 1,
+        "state": "OFF",
+        "last_seen": "2023-07-17T17:11:55+00:00",
+        "linkquality": 178,
+        "level_config": {
+            "on_level": "previous"
+        }
+    },
+    "0xb0ce1814001af1e2": {
+        "brightness": 51,
+        "color_mode": "xy",
+        "state": "OFF",
+        "color_temp": 367,
+        "color": {
+            "x": 0.45917,
+            "y": 0.41254,
+            "hue": 33,
+            "saturation": 82
+        },
+        "color_temp_startup": 65535,
+        "update": {
+            "state": "idle"
+        },
+        "update_available": false,
+        "power": 0.5,
+        "energy": 3.54,
+        "last_seen": "2023-03-11T21:25:38+00:00",
+        "linkquality": 182,
+        "level_config": {
+            "on_level": "previous"
+        }
+    },
+    "0xb0ce1814001882cf": {
+        "brightness": 203,
+        "state": "ON",
+        "color_temp": 247,
+        "color_mode": "color_temp",
+        "color": {
+            "x": 0.3787,
+            "y": 0.3757,
+            "hue": 40,
+            "saturation": 48
+        },
+        "update": {
+            "state": "idle"
+        },
+        "update_available": false,
+        "energy": 18.12,
+        "power": 7.8,
+        "last_seen": "2023-07-17T17:14:56+00:00",
+        "linkquality": 174,
+        "level_config": {
+            "on_level": "previous"
+        }
+    },
+    "0x5c0272fffece1e75": {
+        "state": "OFF",
+        "last_seen": "2023-07-17T17:06:49+00:00",
+        "linkquality": 58
+    },
+    "0x5c0272fffecccced": {
+        "state": "OFF",
+        "last_seen": "2023-07-17T17:12:05+00:00",
+        "linkquality": 149
+    },
+    "0xb0ce1814001afd21": {
+        "brightness": 38,
+        "color_mode": "color_temp",
+        "state": "ON",
+        "color_temp": 370,
+        "color": {
+            "x": 0.4599,
+            "y": 0.4106,
+            "hue": 32,
+            "saturation": 82
+        },
+        "update": {
+            "state": "idle"
+        },
+        "update_available": false,
+        "power": 2.6,
+        "energy": 0.23,
+        "last_seen": "2023-07-17T17:15:03+00:00",
+        "linkquality": 149,
+        "level_config": {
+            "on_level": "previous"
+        }
+    },
+    "0xb0ce1814001afd22": {
+        "brightness": 1,
+        "color_mode": "color_temp",
+        "state": "OFF",
+        "color_temp": 212,
+        "color": {
+            "x": 0.3538,
+            "y": 0.3584,
+            "hue": 44,
+            "saturation": 31
+        },
+        "power": 0.2,
+        "energy": 0.1,
+        "update": {
+            "state": "idle"
+        },
+        "update_available": false,
+        "last_seen": "2023-07-17T17:08:21+00:00",
+        "linkquality": 61,
+        "level_config": {
+            "on_level": "previous"
+        }
+    },
+    "0xb0ce18140018931d": {
+        "brightness": 74,
+        "color_mode": "color_temp",
+        "state": "OFF",
+        "color_temp": 247,
+        "color": {
+            "x": 0.3787,
+            "y": 0.3757,
+            "hue": 40,
+            "saturation": 48
+        },
+        "energy": 0.14,
+        "power": 0.2,
+        "update": {
+            "state": "idle"
+        },
+        "update_available": false,
+        "last_seen": "2023-07-17T17:12:54+00:00",
+        "linkquality": 61,
+        "level_config": {
+            "on_level": "previous"
+        }
+    },
+    "0xb0ce1814001b0b8b": {
+        "brightness": 89,
+        "color_mode": "xy",
+        "state": "ON",
+        "color_temp": 374,
+        "color": {
+            "x": 0.4612,
+            "y": 0.4102,
+            "hue": 32,
+            "saturation": 82
+        },
+        "energy": 1.5,
+        "power": 0.9,
+        "update": {
+            "state": "idle"
+        },
+        "update_available": false,
+        "last_seen": "2023-07-17T17:12:54+00:00",
+        "linkquality": 145,
+        "level_config": {
+            "on_level": "previous"
+        }
+    },
+    "0x5c0272fffece0cd0": {
+        "state": "OFF",
+        "last_seen": "2023-07-17T17:07:57+00:00",
+        "linkquality": 69
+    },
+    "0x0c4314fffea3925a": {
+        "battery": 64,
+        "occupancy": false,
+        "tamper": false,
+        "battery_low": false,
+        "voltage": 2700,
+        "last_seen": "2023-07-17T17:05:51+00:00",
+        "linkquality": 80
+    },
+    "0xb0ce18140301dc7b": {
+        "brightness": 0,
+        "color_mode": "color_temp",
+        "state": "OFF",
+        "color_temp": 303,
+        "update": {
+            "state": "idle",
+            "installed_version": 46,
+            "latest_version": 46
+        },
+        "update_available": false,
+        "last_seen": "2023-07-17T17:13:22+00:00",
+        "linkquality": 65,
+        "level_config": {
+            "on_level": "previous"
+        },
+        "energy": 16.98,
+        "power": 7.2,
+        "color": {
+            "x": 0.417,
+            "y": 0.3963,
+            "hue": 36,
+            "saturation": 68
+        }
+    },
+    "0x5c0272fffece1eb0": {
+        "state": "OFF",
+        "last_seen": "2023-07-17T17:11:53+00:00",
+        "linkquality": 76
+    },
+    "0xcc86ecfffed1a7ce": {
+        "battery": 79,
+        "occupancy": false,
+        "tamper": false,
+        "battery_low": false,
+        "voltage": 2800,
+        "last_seen": "2023-07-17T16:56:56+00:00",
+        "linkquality": 58
+    },
+    "0xb0ce181403011ff3": {
+        "brightness": 0,
+        "color_mode": "color_temp",
+        "state": "OFF",
+        "color_temp": 334,
+        "update": {
+            "state": "idle",
+            "installed_version": 46,
+            "latest_version": 46
+        },
+        "update_available": false,
+        "last_seen": "2023-07-17T17:04:10+00:00",
+        "linkquality": 61,
+        "level_config": {
+            "on_level": "previous"
+        },
+        "energy": 15.54,
+        "power": 0,
+        "color": {
+            "x": 0.4376,
+            "y": 0.4043,
+            "hue": 34,
+            "saturation": 75
+        }
+    },
+    "0xb0ce18140362444c": {
+        "state": "OFF",
+        "power": 0,
+        "update": {
+            "state": "idle"
+        },
+        "energy": 8.56,
+        "last_seen": "2023-07-17T17:14:33+00:00",
+        "linkquality": 72
+    },
+    "0xb0ce181400158ca9": {
+        "update": {
+            "state": "idle"
+        },
+        "state": "OFF",
+        "brightness": 102,
+        "last_seen": "2023-07-17T17:14:29+00:00",
+        "linkquality": 80
+    },
+    "0xb0ce1814036247e6": {
+        "state": "ON",
+        "energy": 31.51,
+        "power": 0,
+        "last_seen": "2023-01-01T17:04:44+00:00",
+        "linkquality": 21
+    }
+}
