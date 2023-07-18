@@ -1,4 +1,4 @@
 # Sets files in repo to be GPG encrypted prior to commit.
 # See git-crypt(8)
 secrets/* filter=git-crypt diff=git-crypt
-appdata/homebot/homebridge/config.* filter=git-crypt diff=git-crypt
+#appdata/homebot/homebridge/config.* filter=git-crypt diff=git-crypt

@@ -105,7 +105,7 @@ services:
     #  - 8200:8200
     volumes:
       - ${APPDATA}/duplicati:/config
-      - /mnt/fast/home:/source
+      - /mnt/fast/home:/source # directory to back up.
     environment:
       - PUID
       - PGID
@@ -285,8 +285,7 @@ services:
       - 53936:53936/tcp # match bridge port from config.json
       - 8581:8581 # web UI
     volumes:
-      - ${APPDATA}/homebridge/config.json:/homebridge/config.json
-      - homebridge_data:/homebridge
+      - ${APPDATA}/homebridge:/homebridge
     logging:
       driver: json-file
       options:
@@ -318,6 +317,6 @@ volumes:
   homebridge_data:
 
 secrets:
-# Obfuscates sensitive information from the docker-compose file.
+  # Obfuscates sensitive information from the docker-compose file.
   cloudflare_dns_api_token:
     file: "./secrets/cloudflare_dns_api_token"
