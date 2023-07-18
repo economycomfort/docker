@@ -46,14 +46,14 @@ is provided for posterity:
 - `APPDATA`: Set to the filesystem location where container-specific 
   configuration is found.
 
-	For convenience, an `appdata/` directory is provided in the repo.  
-  Subdirectories here enumerate application configuration for different 
-  profiles; in this case, a profile = a docker host. Some complexity is 
-  necessary here to satisfy the requirement that home automation services should
-  be minimally configured and as portable as possible.  This prevents using
-  something like an NFS mount to share application configuration, as home 
-  automation services should continue to run even if the primary storage host is
-  down, or not present (in the event of a Proxmox failover, for instance).
+	For convenience, an `appdata/` directory is provided in the repo.  Subdirectories
+  here enumerate application configuration for different profiles; in this case, a
+  profile = a docker host. Some complexity is necessary here to satisfy the
+  requirement that home automation services should be minimally configured and as
+  portable as possible.  This prevents using something like an NFS mount to share
+  application configuration, as home automation services should continue to run even
+  if the primary storage host is down, or not present (in the event of a Proxmox
+  failover, for instance).
 
 	- The `homebot` subdirectory contains configuration for `homebot`-profile 
     services.  Given their minimal-configuration requirement, configuration for 
