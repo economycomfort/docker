@@ -43,8 +43,10 @@ is provided for posterity:
 - `PGID`: Set to the GID of the group the container should run as (probably the 
   `docker` group).  Applies only to `linuxserver`-maintained docker images.
 
-- `APPDATA`: Set to the filesystem location where container-specific 
-  configuration is found.  
+- `APPDATA`: By default, points to `./appdata`, which should be a symlink to the
+  location where service configuration files reside.
+
+  - The `./appdata` symlink will need to be created manually.
   
   - Generally, servo stores configuration for its
     services in `/mnt/fast/appdata/servo`.
