@@ -44,28 +44,16 @@ is provided for posterity:
   `docker` group).  Applies only to `linuxserver`-maintained docker images.
 
 - `APPDATA`: Set to the filesystem location where container-specific 
-  configuration is found.
+  configuration is found.  
+  
+  - Generally, servo stores configuration for its
+    services in `/mnt/fast/appdata/servo`.
 
-	For convenience, an `appdata/` directory is provided in the repo.  Subdirectories
-  here enumerate application configuration for different profiles; in this case, a
-  profile = a docker host. Some complexity is necessary here to satisfy the
-  requirement that home automation services should be minimally configured and as
-  portable as possible.  This prevents using something like an NFS mount to share
-  application configuration, as home automation services should continue to run even
-  if the primary storage host is down, or not present (in the event of a Proxmox
-  failover, for instance).
-
-	- The `homebot` subdirectory contains configuration for `homebot`-profile 
-    services.  Given their minimal-configuration requirement, configuration for 
-    these services are included in this repo (and GPG-encrypted with `git-crypt` 
-    where prudent).
-	
-	- The `servo` symlink should point to where applications hosted on `servo` 
-    should exist.  In this case, these applications have their configuration on 
-    `fast/appdata`, an NVMe-backed ZFS mirror.
-
-	In summary, set `APPDATA` to where the application's configuration should 
-  exist on the host the `docker-compose.yaml` file is running from.
+  - For homebot services, they are probably in `~/appdata` on homebot, with
+    configuration backups held on servo in `/mnt/fast/appdata/homebot`, in the
+    event they need to be restored.  This is to accomodate homebot being able
+    to run home automation services without the need for servo being available,
+    for instance during a Proxmox failover migration.
 
 -	`COMPOSE_PROFILES`: Set to reflect the default profile to be used by the 
   Docker host in question.
