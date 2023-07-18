@@ -5,9 +5,8 @@ Various services for homelab operation.
 ## Description
 
 Provides a single `docker-compose.yaml` file which defines granular docker
-services, networks, and volumes. This file makes use of (Compose profiles)
-[https://docs.docker.com/compose/profiles/], each profile representing a docker
-host which runs a set of services.
+services, networks, and volumes. This file makes use of [Compose profiles](https://docs.docker.com/compose/profiles/), 
+each profile representing a docker host which runs a set of services.
 
 Most defined services have a single profile representing the host they are
 intended to run on. However, some services may contain no profile definition,
