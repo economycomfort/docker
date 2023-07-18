@@ -26,7 +26,7 @@ services:
   traefik:
     container_name: traefik
     image: traefik
-    restart: unless-stopped
+    restart: always
     domainname: ${DOMAINNAME}
     profiles:
       - servo
@@ -71,7 +71,7 @@ services:
   portainer:
     image: portainer/portainer-ce
     container_name: portainer
-    restart: unless-stopped
+    restart: always
     command: -H unix:///var/run/docker.sock
     profiles:
       - servo
