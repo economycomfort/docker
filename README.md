@@ -19,20 +19,27 @@ same docker host.
 
 ### Environment (`.env`)
 
-It is important to modify the `.env` file to reflect the environment the
-services run in on the host that is intended to run them. Note that variables
-within `.env` must all be defined; the default values may not suit your
-environment, and blank values must be completed.
+An `.env` file must be present in order to define some variables which will be
+referenced within `docker-compose.yaml`.  For convenience, a file named
+`.env.example` is present within the repo, and can be used as a template, or 
+simply filled out and renamed to `.env`.
 
 While most values should be rather self-explanatory, the following information
 is provided for posterity:
   
-- `DOMAINNAME`: Set to the domain name which will expose services.  
+- `DOMAINNAME`: Set to the domain name that the reverse proxy (Traefik)
+  container will use to expose services.  
 
 	Traefik uses this domain name to generate dynamic, valid LetsEncrypt 
   certificates via ACME.  This Traefik instance is using a Cloudflare backend 
   (see the `secrets` definition within `docker-compose.yaml`), however specific 
   container configuration is not covered here.
+
+  Services exposed through Traefik should be then accessible via
+  `https://${service_name}.${DOMAINNAME}`.  For example, `https://emby.app.vhf.sh`.
+
+  DNS records should be present to point the container hostnames to the IP of
+  the docker host itself.
 
 - `TZ`: Specifies a timezone for a container.  Applies only to 
   `linuxserver`-maintained docker images.
