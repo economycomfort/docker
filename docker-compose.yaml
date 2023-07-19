@@ -46,26 +46,26 @@ services:
     labels:
       # Let traefik handle this container.
       # Must be specified for a container to be exposed.
-      - traefik.enable=true
+      traefik.enable: true
       
       # Traefik dashboard settings.
       # Note that the api@internal service is traefik-specific.
-      - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAINNAME}`)
-      - traefik.http.routers.traefik.service=api@internal
-      - traefik.http.routers.traefik.tls.certresolver=letsencrypt
-      - traefik.http.routers.traefik.entrypoints=websecure
+      traefik.http.routers.traefik.rule: Host(`traefik.${DOMAINNAME}`)
+      traefik.http.routers.traefik.service: api@internal
+      traefik.http.routers.traefik.tls.certresolver: letsencrypt
+      traefik.http.routers.traefik.entrypoints: websecure
 
       # Password auth (optional) - uses htpasswd user/pass 
       #- "traefik.http.routers.traefik.middlewares=authtraefik"
       #- "traefik.http.middlewares.authtraefik.basicauth.users=user:xxx"
 
       # Global redirect all incoming http to https
-      - traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)
-      - traefik.http.routers.http-catchall.entrypoints=web
-      - traefik.http.routers.http-catchall.middlewares=redirect-to-https
+      traefik.http.routers.http-catchall.rule: hostregexp(`{host:.+}`)
+      traefik.http.routers.http-catchall.entrypoints: web
+      traefik.http.routers.http-catchall.middlewares: redirect-to-https
 
       # Middleware for https redirect
-      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+      traefik.http.middlewares.redirect-to-https.redirectscheme.scheme: https
 
   # Web management for containers 
   portainer:
@@ -81,12 +81,12 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${APPDATA}/portainer/data:/data
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.portainer.rule=Host(`portainer.${DOMAINNAME}`)
-      - traefik.http.routers.portainer.entrypoints=websecure
-      - traefik.http.routers.portainer.tls=true
-      - traefik.http.routers.portainer.tls.certresolver=letsencrypt
-      - traefik.http.services.portainer.loadbalancer.server.port=9000
+      traefik.enable: true
+      traefik.http.routers.portainer.rule: Host(`portainer.${DOMAINNAME}`)
+      traefik.http.routers.portainer.entrypoints: websecure
+      traefik.http.routers.portainer.tls: true
+      traefik.http.routers.portainer.tls.certresolver: letsencrypt
+      traefik.http.services.portainer.loadbalancer.server.port: 8200
 
   # Duplicati for cloud backups of important data.
   duplicati:
@@ -111,12 +111,12 @@ services:
       - PGID
       - TZ
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.duplicati.rule=Host(`duplicati.${DOMAINNAME}`)
-      - traefik.http.routers.duplicati.entrypoints=websecure
-      - traefik.http.routers.duplicati.tls=true
-      - traefik.http.routers.duplicati.tls.certresolver=letsencrypt
-      - traefik.http.services.duplicati.loadbalancer.server.port=8200
+      traefik.enable: true
+      traefik.http.routers.duplicati.rule: Host(`duplicati.${DOMAINNAME}`)
+      traefik.http.routers.duplicati.entrypoints: websecure
+      traefik.http.routers.duplicati.tls: true
+      traefik.http.routers.duplicati.tls.certresolver: letsencrypt
+      traefik.http.services.duplicati.loadbalancer.server.port: 8200
   
   # Emby for media streaming
   emby:
@@ -135,12 +135,12 @@ services:
       - UID=${PUID}
       - GID=${PGID}
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.emby.rule=Host(`emby.${DOMAINNAME}`)
-      - traefik.http.routers.emby.entrypoints=websecure
-      - traefik.http.routers.emby.tls=true
-      - traefik.http.routers.emby.tls.certresolver=letsencrypt
-      - traefik.http.services.emby.loadbalancer.server.port=8096
+      traefik.enable: true
+      traefik.http.routers.emby.rule: Host(`emby.${DOMAINNAME}`)
+      traefik.http.routers.emby.entrypoints: websecure
+      traefik.http.routers.emby.tls: true
+      traefik.http.routers.emby.tls.certresolver: letsencrypt
+      traefik.http.services.emby.loadbalancer.server.port: 8096
 
   # Sabnzbd for snatching usenet NZBs
   sabnzbd:
@@ -160,12 +160,12 @@ services:
       - PUID
       - PGID
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.sabnzbd.rule=Host(`sabnzbd.${DOMAINNAME}`)
-      - traefik.http.routers.sabnzbd.entrypoints=websecure
-      - traefik.http.routers.sabnzbd.tls=true
-      - traefik.http.routers.sabnzbd.tls.certresolver=letsencrypt
-      - traefik.http.services.sabnzbd.loadbalancer.server.port=8080
+      traefik.enable: true
+      traefik.http.routers.sabnzbd.rule: Host(`sabnzbd.${DOMAINNAME}`)
+      traefik.http.routers.sabnzbd.entrypoints: websecure
+      traefik.http.routers.sabnzbd.tls: true
+      traefik.http.routers.sabnzbd.tls.certresolver: letsencrypt
+      traefik.http.services.sabnzbd.loadbalancer.server.port: 8080
    
   # Sonarr for TV series management
   sonarr:
@@ -188,12 +188,12 @@ services:
       - PUID
       - PGID
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.sonarr.rule=Host(`sonarr.${DOMAINNAME}`)
-      - traefik.http.routers.sonarr.entrypoints=websecure
-      - traefik.http.routers.sonarr.tls=true
-      - traefik.http.routers.sonarr.tls.certresolver=letsencrypt
-      - traefik.http.services.sonarr.loadbalancer.server.port=8989
+      traefik.enable: yes
+      traefik.http.routers.sonarr.rule: Host(`sonarr.${DOMAINNAME}`)
+      traefik.http.routers.sonarr.entrypoints: websecure
+      traefik.http.routers.sonarr.tls: yes
+      traefik.http.routers.sonarr.tls.certresolver: letsencrypt
+      traefik.http.services.sonarr.loadbalancer.server.port: 8989
   
   # qbittorrent for torrents
   qbittorrent:
@@ -219,12 +219,12 @@ services:
       - 51444:51444
       - 51444:51444/udp
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.qbittorrent.rule=Host(`qbittorrent.${DOMAINNAME}`)
-      - traefik.http.routers.qbittorrent.entrypoints=websecure
-      - traefik.http.routers.qbittorrent.tls=true
-      - traefik.http.routers.qbittorrent.tls.certresolver=letsencrypt
-      - traefik.http.services.qbittorrent.loadbalancer.server.port=8080
+      traefik.enable: true
+      traefik.http.routers.qbittorrent.rule: Host(`qbittorrent.${DOMAINNAME}`)
+      traefik.http.routers.qbittorrent.entrypoints: websecure
+      traefik.http.routers.qbittorrent.tls: true
+      traefik.http.routers.qbittorrent.tls.certresolver: letsencrypt
+      traefik.http.services.qbittorrent.loadbalancer.server.port: 8080
   
   ##
   ## HOMEBOT CONTAINERS
@@ -308,7 +308,7 @@ services:
         max-file: 1
     labels:
       # Do not update this container via watchtower
-      - com.centurylinklabs.watchtower.enable=false
+      com.centurylinklabs.watchtower.enable: false
 
 networks:
   # Default docker bridge network
