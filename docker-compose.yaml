@@ -7,8 +7,8 @@ services:
   # Watchtower keeps all other containers current
   watchtower:
     container_name: watchtower
-    restart: always
     image: containrrr/watchtower
+    restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     # Checks for new container images every day at 6AM (cron format)
@@ -86,7 +86,7 @@ services:
       traefik.http.routers.portainer.entrypoints: websecure
       traefik.http.routers.portainer.tls: true
       traefik.http.routers.portainer.tls.certresolver: letsencrypt
-      traefik.http.services.portainer.loadbalancer.server.port: 8200
+      traefik.http.services.portainer.loadbalancer.server.port: 9000
 
   # Duplicati for cloud backups of important data.
   duplicati:
@@ -229,7 +229,7 @@ services:
   ##
   ## HOMEBOT CONTAINERS
   ##
-  # Portainer agent for remote container management
+  # Portainer agent for remote container management.
   portainer-agent:
     container_name: portainer-agent
     image: portainer/agent
@@ -329,7 +329,9 @@ networks:
 
 volumes:
   zigbee2mqtt_log:
+    driver: local
   homebridge_data:
+    driver: local
 
 secrets:
   # Obfuscates sensitive information from the docker-compose file.
