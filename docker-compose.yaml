@@ -200,7 +200,7 @@ services:
       traefik.http.routers.sabnzbd.tls.certresolver: letsencrypt
       traefik.http.services.sabnzbd.loadbalancer.server.port: 8080
    
-  # Sonarr for TV series management
+  # Media management for TV shows
   sonarr:
     container_name: sonarr
     image: lscr.io/linuxserver/sonarr
@@ -227,6 +227,56 @@ services:
       traefik.http.routers.sonarr.tls: true
       traefik.http.routers.sonarr.tls.certresolver: letsencrypt
       traefik.http.services.sonarr.loadbalancer.server.port: 8989
+
+  # Media management for movies
+  radarr:
+    container_name: radarr
+    image: lscr.io/linuxserver/radarr:latest
+    restart: unless-stopped
+    profiles:
+      - servo
+    networks:
+      - reverse_proxy
+    volumes:
+      - ${APPDATA}/radarr:/config
+      - /mnt/tank/media/movies:/movies # WDMA?
+      - /mnt/tank/media/downloads:/downloads
+    environment:
+      - PUID
+      - PGID
+      - TZ
+    labels:
+      traefik.enable: true
+      traefik.http.routers.radarr.rule: Host(`radarr.${DOMAINNAME}`)
+      traefik.http.routers.radarr.entrypoints: websecure
+      traefik.http.routers.radarr.tls: true
+      traefik.http.routers.radarr.tls.certresolver: letsencrypt
+      traefik.http.services.radarr.loadbalancer.server.port: 7878
+
+  # Media tracker management
+  prowlarr:
+    container_name: prowlarr
+    image: lscr.io/linuxserver/prowlarr:latest
+    restart: unless-stopped
+    profiles:
+      - servo
+    networks:
+      - reverse_proxy
+    environment:
+      - PUID
+      - PGID
+      - TZ
+    volumes:
+      - ${APPDATA}/prowlarr:/config
+    ports:
+      - 9696:9696
+    labels:
+      traefik.enable: true
+      traefik.http.routers.prowlarr.rule: Host(`prowlarr.${DOMAINNAME}`)
+      traefik.http.routers.prowlarr.entrypoints: websecure
+      traefik.http.routers.prowlarr.tls: true
+      traefik.http.routers.prowlarr.tls.certresolver: letsencrypt
+      traefik.http.services.prowlarr.loadbalancer.server.port: 8989
   
   # qbittorrent for torrents
   qbittorrent:
