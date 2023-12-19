@@ -67,6 +67,38 @@ services:
       # Middleware for https redirect
       traefik.http.middlewares.redirect-to-https.redirectscheme.scheme: https
 
+  # Homelab dashboard
+  # Dashy is simplistic, but contains a declarative configuration file that is
+  # easily modified and replicated.
+  dashy:
+    image: lissy93/dashy
+    container_name: dashy
+    restart: unless-stopped
+    profiles:
+      - servo
+    networks:
+      - reverse_proxy
+    volumes:
+      - ${APPDATA}/dashy:/app/public
+      - ${APPDATA}/shared/dashboard-icons/png:/app/public/item-icons/icons
+    environment:
+      - NODE_ENV=production
+      - UID=${PUID}
+      - GID=${PGID}
+    healthcheck:
+      test: ['CMD', 'node', '/app/services/healthcheck']
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      traefik.enable: true
+      traefik.http.routers.dashy.rule: Host(`dashy.${DOMAINNAME}`)
+      traefik.http.routers.dashy.entrypoints: websecure
+      traefik.http.routers.dashy.tls: true
+      traefik.http.routers.dashy.tls.certresolver: letsencrypt
+      traefik.http.services.dashy.loadbalancer.server.port: 80
+  
   # Web management for containers 
   portainer:
     image: portainer/portainer-ce
@@ -91,7 +123,7 @@ services:
   # Duplicati for cloud backups of important data.
   duplicati:
     container_name: duplicati
-    image: linuxserver/duplicati
+    image: lscr.io/linuxserver/duplicati
     restart: unless-stopped
     profiles:
       - servo
@@ -121,7 +153,7 @@ services:
   # Emby for media streaming
   emby:
     container_name: emby
-    image: emby/embyserver
+    image: lscr.io/linuxserver/emby
     restart: unless-stopped
     profiles:
       - servo
@@ -132,8 +164,9 @@ services:
       - /mnt/tank/media/tv:/mnt/tv
       - /mnt/tank/media/movies:/mnt/movies
     environment:
-      - UID=${PUID}
-      - GID=${PGID}
+      - PUID
+      - PGID
+      - TZ
     labels:
       traefik.enable: true
       traefik.http.routers.emby.rule: Host(`emby.${DOMAINNAME}`)
@@ -145,7 +178,7 @@ services:
   # Sabnzbd for snatching usenet NZBs
   sabnzbd:
     container_name: sabnzbd
-    image: linuxserver/sabnzbd
+    image: lscr.io/linuxserver/sabnzbd
     restart: unless-stopped
     profiles:
       - servo
@@ -156,9 +189,9 @@ services:
       - /mnt/tank/media/downloads/complete:/downloads/complete
       - /mnt/tank/media/downloads/incomplete:/downloads/incomplete
     environment:
-      - TZ
       - PUID
       - PGID
+      - TZ
     labels:
       traefik.enable: true
       traefik.http.routers.sabnzbd.rule: Host(`sabnzbd.${DOMAINNAME}`)
@@ -170,7 +203,7 @@ services:
   # Sonarr for TV series management
   sonarr:
     container_name: sonarr
-    image: linuxserver/sonarr
+    image: lscr.io/linuxserver/sonarr
     restart: unless-stopped
     profiles:
       - servo
@@ -184,9 +217,9 @@ services:
       - /mnt/tank/media/downloads:/downloads
       - /mnt/tank/media/tv:/tv
     environment:
-      - TZ
       - PUID
       - PGID
+      - TZ
     labels:
       traefik.enable: true
       traefik.http.routers.sonarr.rule: Host(`sonarr.${DOMAINNAME}`)
@@ -198,7 +231,7 @@ services:
   # qbittorrent for torrents
   qbittorrent:
     container_name: qbittorrent
-    image: linuxserver/qbittorrent
+    image: lscr.io/linuxserver/qbittorrent
     restart: unless-stopped
     profiles:
       - servo

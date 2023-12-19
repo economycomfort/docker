@@ -24,6 +24,8 @@ referenced within `docker-compose.yaml`.  For convenience, a file named
 `.env.example` is present within the repo, and can be used as a template, or 
 simply filled out and renamed to `.env`.
 
+#### Environment variable definitions
+
 While most values should be rather self-explanatory, the following information
 is provided for posterity:
   
@@ -62,7 +64,8 @@ is provided for posterity:
     configuration backups held on servo in `/mnt/fast/appdata/homebot`, in the
     event they need to be restored.  This is to accomodate homebot being able
     to run home automation services without the need for servo being available,
-    for instance during a Proxmox failover migration.
+    for instance during a Proxmox failover where the servo VM wouldn't be
+    running, or a reboot of the servo VM.
 
 -	`COMPOSE_PROFILES`: Set to reflect the default profile to be used by the 
   Docker host in question.
@@ -105,3 +108,10 @@ Start only `servo`-profiled services:
 **More info**:
   - https://docs.docker.com/compose/profiles/
   - https://nickjanetakis.com/blog/docker-tip-94-docker-compose-v2-and-profiles-are-the-best-thing-ever
+
+## License
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+Licensed under the MIT License.
+See [LICENSE](LICENSE) file.
