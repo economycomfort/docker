@@ -186,8 +186,7 @@ services:
       - reverse_proxy
     volumes:
       - ${APPDATA}/sabnzbd:/config
-      - /mnt/tank/media/downloads/complete:/downloads/complete
-      - /mnt/tank/media/downloads/incomplete:/downloads/incomplete
+      - /mnt/tank/media/downloads/sabnzbd:/downloads
     environment:
       - PUID
       - PGID
@@ -289,7 +288,7 @@ services:
       - reverse_proxy
     volumes:
       - ${APPDATA}/qbittorrent:/config
-      - ${APPDATA}/shared/torrents:/downloads
+      - /mnt/tank/media/downloads:/downloads
       - /mnt/tank/media/movies:/downloads/movies
       - /mnt/tank/media/tv:/downloads/tv
     environment:
