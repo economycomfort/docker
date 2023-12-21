@@ -163,6 +163,7 @@ services:
       - ${APPDATA}/emby:/config
       - /mnt/tank/media/tv:/mnt/tv
       - /mnt/tank/media/movies:/mnt/movies
+      - /mnt/tank/media/other:/mnt/other
     environment:
       - PUID
       - PGID
@@ -186,7 +187,7 @@ services:
       - reverse_proxy
     volumes:
       - ${APPDATA}/sabnzbd:/config
-      - /mnt/tank/media/downloads/sabnzbd:/downloads
+      - /mnt/tank/media/downloads:/downloads
     environment:
       - PUID
       - PGID
@@ -213,8 +214,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${APPDATA}/sonarr:/config
-      - /mnt/tank/media/downloads:/downloads
       - /mnt/tank/media/tv:/tv
+      - /mnt/tank/media/downloads:/downloads
     environment:
       - PUID
       - PGID
@@ -238,7 +239,7 @@ services:
       - reverse_proxy
     volumes:
       - ${APPDATA}/radarr:/config
-      - /mnt/tank/media/movies:/movies # WDMA?
+      - /mnt/tank/media/movies:/movies
       - /mnt/tank/media/downloads:/downloads
     environment:
       - PUID
@@ -289,8 +290,6 @@ services:
     volumes:
       - ${APPDATA}/qbittorrent:/config
       - /mnt/tank/media/downloads:/downloads
-      - /mnt/tank/media/movies:/downloads/movies
-      - /mnt/tank/media/tv:/downloads/tv
     environment:
       - TZ
       - PUID
@@ -314,7 +313,7 @@ services:
   # Portainer agent for remote container management.
   portainer-agent:
     container_name: portainer-agent
-    image: portainer/agent
+    image: portainer/agent:latest
     restart: always
     profiles:
       - homebot
