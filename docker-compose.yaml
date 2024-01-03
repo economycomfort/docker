@@ -306,6 +306,28 @@ services:
       traefik.http.routers.qbittorrent.tls: true
       traefik.http.routers.qbittorrent.tls.certresolver: letsencrypt
       traefik.http.services.qbittorrent.loadbalancer.server.port: 8080
+
+  ombi:
+    container_name: ombi
+    image: lscr.io/linuxserver/ombi:latest
+    restart: unless-stopped
+    profiles:
+      - servo
+    networks:
+      - reverse_proxy
+    volumes:
+      - ${APPDATA}/ombi:/config
+    environment:
+      - PUID
+      - PGID
+      - TZ
+    labels:
+      traefik.enable: true
+      traefik.http.routers.ombi.rule: Host(`ombi.${DOMAINNAME}`)
+      traefik.http.routers.ombi.entrypoints: websecure
+      traefik.http.routers.ombi.tls: true
+      traefik.http.routers.ombi.tls.certresolver: letsencrypt
+      traefik.http.services.ombi.loadbalancer.server.port: 3579   
   
   ##
   ## HOMEBOT CONTAINERS
