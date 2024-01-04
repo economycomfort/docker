@@ -187,7 +187,7 @@ services:
       - reverse_proxy
     volumes:
       - ${APPDATA}/sabnzbd:/config
-      - /mnt/tank/media/downloads:/downloads
+      - /mnt/fast/downloads:/downloads
     environment:
       - PUID
       - PGID
@@ -215,7 +215,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${APPDATA}/sonarr:/config
       - /mnt/tank/media/tv:/tv
-      - /mnt/tank/media/downloads:/downloads
+      - /mnt/fast/downloads:/downloads
     environment:
       - PUID
       - PGID
@@ -240,7 +240,7 @@ services:
     volumes:
       - ${APPDATA}/radarr:/config
       - /mnt/tank/media/movies:/movies
-      - /mnt/tank/media/downloads:/downloads
+      - /mnt/fast/downloads:/downloads
     environment:
       - PUID
       - PGID
@@ -289,7 +289,7 @@ services:
       - reverse_proxy
     volumes:
       - ${APPDATA}/qbittorrent:/config
-      - /mnt/tank/media/downloads:/downloads
+      - /mnt/fast/downloads:/downloads
     environment:
       - TZ
       - PUID
