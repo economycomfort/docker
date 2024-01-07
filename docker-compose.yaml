@@ -112,6 +112,10 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${APPDATA}/portainer/data:/data
+    environment:
+      - PUID
+      - PGID
+      - TZ
     labels:
       traefik.enable: true
       traefik.http.routers.portainer.rule: Host(`portainer.${DOMAINNAME}`)
@@ -137,7 +141,8 @@ services:
     #  - 8200:8200
     volumes:
       - ${APPDATA}/duplicati:/config
-      - /mnt/fast/home:/source # directory to back up.
+      - /mnt/fast/home:/source/home # directory to back up.
+      - /mnt/fast/appdata:/source/appdata # another directory to back up.
     environment:
       - PUID
       - PGID
