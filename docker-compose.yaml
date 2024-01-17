@@ -204,12 +204,43 @@ services:
       traefik.http.routers.sabnzbd.tls: true
       traefik.http.routers.sabnzbd.tls.certresolver: letsencrypt
       traefik.http.services.sabnzbd.loadbalancer.server.port: 8080
+
+  # qbittorrent for torrents
+  qbittorrent:
+    container_name: qbittorrent
+    image: lscr.io/linuxserver/qbittorrent
+    restart: unless-stopped
+    profiles:
+      - servo
+    networks:
+      - reverse_proxy
+    volumes:
+      - ${APPDATA}/qbittorrent:/config
+      - /mnt/fast/downloads:/downloads
+    environment:
+      - TZ
+      - PUID
+      - PGID
+      - UMASK_SET=022
+      - WEBUI_PORT=8080
+    ports:
+      - 51444:51444
+      - 51444:51444/udp
+    labels:
+      traefik.enable: true
+      traefik.http.routers.qbittorrent.rule: Host(`qbittorrent.${DOMAINNAME}`)
+      traefik.http.routers.qbittorrent.entrypoints: websecure
+      traefik.http.routers.qbittorrent.tls: true
+      traefik.http.routers.qbittorrent.tls.certresolver: letsencrypt
+      traefik.http.services.qbittorrent.loadbalancer.server.port: 8080
    
   # Media management for TV shows
   sonarr:
     container_name: sonarr
     image: lscr.io/linuxserver/sonarr
     restart: unless-stopped
+    depends_on: 
+      - prowlarr
     profiles:
       - servo
     networks:
@@ -238,6 +269,8 @@ services:
     container_name: radarr
     image: lscr.io/linuxserver/radarr:latest
     restart: unless-stopped
+    depends_on: 
+      - prowlarr
     profiles:
       - servo
     networks:
@@ -273,45 +306,42 @@ services:
       - TZ
     volumes:
       - ${APPDATA}/prowlarr:/config
-    ports:
-      - 9696:9696
     labels:
       traefik.enable: true
       traefik.http.routers.prowlarr.rule: Host(`prowlarr.${DOMAINNAME}`)
       traefik.http.routers.prowlarr.entrypoints: websecure
       traefik.http.routers.prowlarr.tls: true
       traefik.http.routers.prowlarr.tls.certresolver: letsencrypt
-      traefik.http.services.prowlarr.loadbalancer.server.port: 8989
+      traefik.http.services.prowlarr.loadbalancer.server.port: 9696
   
-  # qbittorrent for torrents
-  qbittorrent:
-    container_name: qbittorrent
-    image: lscr.io/linuxserver/qbittorrent
+  # Media config sync + notification 
+  notifiarr:
+    container_name: notifiarr
+    image: golift/notifiarr
+    hostname: notifiarr
     restart: unless-stopped
     profiles:
       - servo
     networks:
       - reverse_proxy
     volumes:
-      - ${APPDATA}/qbittorrent:/config
-      - /mnt/fast/downloads:/downloads
+      - ${APPDATA}/notifiarr:/config
+      - /var/run/utmp:/var/run/utmp
     environment:
-      - TZ
-      - PUID
-      - PGID
-      - UMASK_SET=022
-      - WEBUI_PORT=8080
-    ports:
-      - 51444:51444
-      - 51444:51444/udp
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
+    #ports:
+    #  - "5454:5454"
     labels:
       traefik.enable: true
-      traefik.http.routers.qbittorrent.rule: Host(`qbittorrent.${DOMAINNAME}`)
-      traefik.http.routers.qbittorrent.entrypoints: websecure
-      traefik.http.routers.qbittorrent.tls: true
-      traefik.http.routers.qbittorrent.tls.certresolver: letsencrypt
-      traefik.http.services.qbittorrent.loadbalancer.server.port: 8080
+      traefik.http.routers.notifiarr.rule: Host(`notifiarr.${DOMAINNAME}`)
+      traefik.http.routers.notifiarr.entrypoints: websecure
+      traefik.http.routers.notifiarr.tls: true
+      traefik.http.routers.notifiarr.tls.certresolver: letsencrypt
+      traefik.http.services.notifiarr.loadbalancer.server.port: 5454
 
+  # Media requests
   ombi:
     container_name: ombi
     image: lscr.io/linuxserver/ombi:latest
@@ -373,7 +403,7 @@ services:
     hostname: zigbee2mqtt
     image: koenkk/zigbee2mqtt:latest
     restart: always
-    depends_on:
+    depends_on: 
       - mqtt
     profiles:
       - homebot
@@ -403,7 +433,7 @@ services:
       - homebot
     networks:
       - homebot
-    # network_mode: host  # use if docker bridge + avahi has issues      
+    # network_mode: host  # use if docker bridge + mDNS repeater has issues      
     ports:
       - 53936:53936/tcp # match bridge port from config.json
       - 8581:8581 # web UI
