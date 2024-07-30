@@ -181,6 +181,32 @@ services:
       traefik.http.routers.emby.tls.certresolver: letsencrypt
       traefik.http.services.emby.loadbalancer.server.port: 8096
 
+  #  Media streaming - TESTING
+  jellyfin:
+    container_name: jellyfin
+    image: lscr.io/linuxserver/jellyfin
+    restart: unless-stopped
+    profiles:
+      - servo
+    networks:
+      - reverse_proxy
+    volumes:
+      - ${APPDATA}/jellyfin:/config
+      - /mnt/tank/media/tv:/media/tv
+      - /mnt/tank/media/movies:/media/movies
+      - /mnt/tank/media/other:/media/other
+    environment:
+      - PUID
+      - PGID
+      - TZ
+    labels:
+      traefik.enable: true
+      traefik.http.routers.jellyfin.rule: Host(`jellyfin.${DOMAINNAME}`)
+      traefik.http.routers.jellyfin.entrypoints: websecure
+      traefik.http.routers.jellyfin.tls: true
+      traefik.http.routers.jellyfin.tls.certresolver: letsencrypt
+      traefik.http.services.jellyfin.loadbalancer.server.port: 8096
+
   # Sabnzbd for snatching usenet NZBs
   sabnzbd:
     container_name: sabnzbd
@@ -216,7 +242,7 @@ services:
       - reverse_proxy
     volumes:
       - ${APPDATA}/qbittorrent:/config
-      - /mnt/fast/downloads:/downloads
+      - /mnt/tank/media/torrents:/downloads
     environment:
       - TZ
       - PUID
