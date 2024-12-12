@@ -142,9 +142,12 @@ services:
       - /mnt/fast/home:/source/home # directory to back up.
       - /mnt/fast/appdata:/source/appdata # another directory to back up.
     environment:
+      - DUPLICATI__DISABLE_DB_ENCRYPTION: true
       - PUID
       - PGID
       - TZ
+    secrets:
+      - duplicati_preload_settings
     labels:
       traefik.enable: true
       traefik.http.routers.duplicati.rule: Host(`duplicati.${DOMAINNAME}`)
@@ -499,3 +502,5 @@ secrets:
   # Obfuscates sensitive information from the docker-compose file.
   cloudflare_dns_api_token:
     file: "./secrets/cloudflare_dns_api_token"
+  duplicati_preload_settings: # duplicati loads secrets from file
+    file: "./secrets/duplicati_preload.json"
