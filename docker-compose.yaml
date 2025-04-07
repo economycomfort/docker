@@ -219,7 +219,7 @@ services:
       - reverse_proxy
     volumes:
       - ${APPDATA}/sabnzbd:/config
-      - /mnt/fast/downloads:/downloads
+      - /mnt/scratch/downloads:/downloads
     environment:
       - PUID
       - PGID
@@ -278,7 +278,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${APPDATA}/sonarr:/config
       - /mnt/tank/media/tv:/tv
-      - /mnt/fast/downloads:/downloads
+      - /mnt/scratch/downloads:/downloads
     environment:
       - PUID
       - PGID
@@ -462,7 +462,9 @@ services:
       - homebot
     # network_mode: host  # use if docker bridge + mDNS repeater has issues      
     ports:
-      - 53936:53936/tcp # match bridge port from config.json
+      - 53936:53936 # match bridge port from config.json (primary)
+      - 37996:37996 # homebridge-unifi-protect child bridge
+      - 37530:37530 # homebridge-z2m child bridge
       - 8581:8581 # web UI
     volumes:
       - ${APPDATA}/homebridge:/homebridge
