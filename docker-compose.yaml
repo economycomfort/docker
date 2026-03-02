@@ -9,8 +9,8 @@ services:
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    # Checks for new container images every day at 6AM (cron format)
-    command: --schedule "0 0 6 * * *"
+    # Checks for new container images every day at 3AM (cron format)
+    command: --schedule "0 0 3 * * *"
   
   ##
   ## SERVO CONTAINERS
@@ -65,39 +65,29 @@ services:
       # Middleware for https redirect
       traefik.http.middlewares.redirect-to-https.redirectscheme.scheme: https
 
-  # Homelab dashboard
-  # Dashy is simplistic, but contains a declarative configuration file that is
-  # easily modified and replicated.
-  dashy:
-    image: lissy93/dashy
-    container_name: dashy
+  # Samba
+  samba:
+    container_name: samba
+    image: lscr.io/linuxserver/samba
     restart: unless-stopped
     profiles:
       - servo
     networks:
       - reverse_proxy
+    ports:
+      - 139:139
+      - 445:445
     volumes:
-      - ${APPDATA}/dashy:/app/public
-      - ${APPDATA}/shared/dashboard-icons/png:/app/public/item-icons/icons
+      - ${APPDATA}/samba:/config
+      - /mnt/fast:/mnt/fast # share the fast storage pool.
+      - /mnt/tank:/mnt/tank # share the tank storage pool.
     environment:
-      - NODE_ENV=production
-      - UID=${PUID}
-      - GID=${PGID}
-    healthcheck:
-      test: ['CMD', 'node', '/app/services/healthcheck']
-      interval: 1m30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    labels:
-      traefik.enable: true
-      traefik.http.routers.dashy.rule: Host(`dashy.${DOMAINNAME}`)
-      traefik.http.routers.dashy.entrypoints: websecure
-      traefik.http.routers.dashy.tls: true
-      traefik.http.routers.dashy.tls.certresolver: letsencrypt
-      traefik.http.services.dashy.loadbalancer.server.port: 80
-  
+      - PUID
+      - PGID
+      - TZ
+
   # Web management for containers 
+  # I don't know why I have this because I never use it
   portainer:
     image: portainer/portainer-ce
     container_name: portainer
@@ -123,6 +113,7 @@ services:
       traefik.http.services.portainer.loadbalancer.server.port: 9000
 
   # Duplicati for cloud backups of important data.
+  # 20240506: Duplicati alternatives? `zfs-send` -{ssh}--> *.cloud ? 
   duplicati:
     container_name: duplicati
     image: lscr.io/linuxserver/duplicati
@@ -142,7 +133,7 @@ services:
       - /mnt/fast/home:/source/home # directory to back up.
       - /mnt/fast/appdata:/source/appdata # another directory to back up.
     environment:
-      - DUPLICATI__DISABLE_DB_ENCRYPTION: true
+      - DUPLICATI__DISABLE_DB_ENCRYPTION="true"
       - PUID
       - PGID
       - TZ
